@@ -2,14 +2,18 @@ import pygame
 from pygame.locals import *
 import time
 import random	
-class HeroPlane(object):
-	def __init__(self,screen_temp):
-		self.x = 210
-		self.y = 700
-		self.screen = screen_temp
-		self.image = pygame.image.load("./feiji/hero1.png")		
+
+class Base(object):
+	def __init__(self,screen_temp,x,y,image_name):
+                self.x = x
+                self.y = y
+                self.screen = screen_temp
+                self.image = pygame.image.load(image_name)
+class BasePlane(Base):
+	def __init__(self,screen_temp,x,y,image_name):
+		Base.__init__(self,screen_temp,x,y,image_name)		
 		self.bullet_list = []
-	
+
 	def display(self):		
 		self.screen.blit(self.image,(self.x,self.y))
 	
@@ -18,6 +22,9 @@ class HeroPlane(object):
 			bullet.move()
 			if bullet.judge():
 				self.bullet_list.remove(bullet)
+class HeroPlane(BasePlane):
+	def __init__(self,screen_temp):
+		BasePlane.__init__(self,screen_temp,210,700,"./feiji/hero1.png")
 	def move_left(self):
 		self.x -= 10
 
@@ -33,24 +40,11 @@ class HeroPlane(object):
 	def fire(self):
 		self.bullet_list.append(Bullet(self.screen,self.x,self.y))	
 
-class EnemyPlane(object):
+class EnemyPlane(BasePlane):
 	def __init__(self,screen_temp):
-		self.x = 0
-		self.y = 0
+		BasePlane.__init__(self,screen_temp,0,0,"./feiji/enemy0.png")
 		self.direction = "right"#用来储存飞机默认的显示方向
-		self.screen = screen_temp
-		self.image = pygame.image.load("./feiji/enemy0.png")		
-		self.bullet_list = []
 	
-	def display(self):		
-		self.screen.blit(self.image,(self.x,self.y))
-	
-		for bullet in self.bullet_list:
-			bullet.display()
-			bullet.move()	
-			if bullet.judge():
-				self.bullet_list.remove(bullet)
-
 	def move(self):
 		if self.direction == "right":
 			self.x += 5
@@ -64,15 +58,13 @@ class EnemyPlane(object):
 		random_num = random.randint(1,100)
 		if random_num == 8 or random_num == 50:
 			self.bullet_list.append(EnemyBullet(self.screen,self.x,self.y))
-class Bullet(object):
-	def __init__(self,screen_temp,x,y):
-		self.x = x + 40
-		self.y = y - 20
-		self.screen = screen_temp
-		self.image = pygame.image.load("./feiji/bullet.png")
+class BaseBullet(Base):
 	
 	def display(self):
 		self.screen.blit(self.image,(self.x,self.y))
+class Bullet(BaseBullet):
+	def __init__(self,screen_temp,x,y):
+		BaseBullet.__init__(self,screen_temp,x+40,y-20,"./feiji/bullet.png")
 	
 	def move(self):
 		self.y -= 15
@@ -83,15 +75,9 @@ class Bullet(object):
 		else:
 			return False
 
-class EnemyBullet(object):
+class EnemyBullet(BaseBullet):
 	def __init__(self,screen_temp,x,y):
-		self.x = x+25
-		self.y = y+40
-		self.screen = screen_temp
-		self.image = pygame.image.load("./feiji/bullet1.png")
-	
-	def display(self):
-		self.screen.blit(self.image,(self.x,self.y))
+		BaseBullet.__init__(self,screen_temp,x+25,y+40,"./feiji/bullet1.png")
 	
 	def move(self):
 		self.y += 5
